@@ -5,11 +5,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -33,6 +36,8 @@ public class MigrationService {
     private static final String RUN_MODE = "run";
     private static final String TEST_MODE = "test";
     
+
+    
     
     private String hbaseZkQuorum;
 
@@ -55,6 +60,10 @@ public class MigrationService {
     private String batchSize;
     
     private boolean synchronic;
+    
+    private String retrySleep;
+    
+    private String retryAttempts;
     
     private Properties environmentProperties;
     private Properties tablesProperties;
@@ -85,7 +94,17 @@ public class MigrationService {
 			if (mode.equalsIgnoreCase(RUN_MODE)) {
 				instance.process();
 			} else {
-				LOG.info("connection test finished");
+				boolean exists = false;
+				try {
+					FileSystem fs = FileSystem.get(instance.conf);
+					Path path = new Path(instance.jar);
+					exists = fs.exists(path);
+					LOG.info("jar found in hdfs: {}", exists);
+				} catch (Exception e) {
+					LOG.error("invalid or missing jar", e);
+				} 
+				String result = exists ? "ok" : "failed";
+ 				LOG.info("connection test {}", result);
 			}
 			System.exit(0);
 		} catch (Exception e) {
@@ -112,6 +131,9 @@ public class MigrationService {
 	    this.batchSize = this.loadProperty("batch.size");
 	    this.synchronic = Boolean.parseBoolean(this.loadProperty("synchronic"));
 	    this.sourceRetries = Integer.parseInt(this.loadProperty("hbase.client.retries.number"));
+	    // hbase.client.pause  default to 1000 (1 second)
+	    this.retrySleep = this.loadProperty(MigrationMapper.RETRY_SLEEP_MILLISECONDS);
+	    this.retryAttempts = this.loadProperty(MigrationMapper.RETRY_ATTEMPTS);
 	    
 		FileInputStream tablesInputStream = new FileInputStream( new File(tablesPath));
 		tablesProperties = new Properties();
@@ -179,6 +201,9 @@ public class MigrationService {
         conf.set(MigrationMapper.HBASE_ZK_QUORUM, this.hbaseZkQuorum);
         conf.set(MigrationMapper.HBASE_ZNODE_PARENT, this.hbaseZNodeParent);
         conf.set(MigrationMapper.FS_DEFAULT_NAME, this.fsDefaultName);
+        
+        conf.set(MigrationMapper.RETRY_SLEEP_MILLISECONDS, this.retrySleep);
+        conf.set(MigrationMapper.RETRY_ATTEMPTS, this.retryAttempts);
 
         DistributedCache.addCacheFile(new URI(this.jar), conf);
 

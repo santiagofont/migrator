@@ -25,14 +25,17 @@ public class MigrationMapper
 
     private static final Logger logger = LoggerFactory.getLogger(MigrationMapper.class);
 
-    private final static String SERVER_CLASS = "com.despegar.p13n.hbasetool.TableWriter";
+    protected final static String SERVER_CLASS = "com.despegar.p13n.hbasetool.TableWriter";
 
     public final static String TARGET_TABLE_NAME = "target_table_name";
     public final static String BATCH_SIZE = "put_batch_size";
 
-    public final static String HBASE_ZK_QUORUM = "HBASE_ZK_QUORUM";
-    public final static String HBASE_ZNODE_PARENT = "HBASE_ZNODE_PARENT";
-    public final static String FS_DEFAULT_NAME = "FS_DEFAULT_NAME";
+    protected final static String HBASE_ZK_QUORUM = "HBASE_ZK_QUORUM";
+    protected final static String HBASE_ZNODE_PARENT = "HBASE_ZNODE_PARENT";
+    protected final static String FS_DEFAULT_NAME = "FS_DEFAULT_NAME";
+    
+	protected final static String RETRY_SLEEP_MILLISECONDS = "migrator.retry.sleep";
+	protected final static String RETRY_ATTEMPTS = "migrator.retry.attempts";
 
     public final static String JAR = "h2_server_jar";
 
@@ -95,6 +98,9 @@ public class MigrationMapper
         String zkQuorum = context.getConfiguration().get(HBASE_ZK_QUORUM);
         String zNodeParent = context.getConfiguration().get(HBASE_ZNODE_PARENT);
         String fsDefaultName = context.getConfiguration().get(FS_DEFAULT_NAME);
+        
+        String retrySleep = context.getConfiguration().get(RETRY_SLEEP_MILLISECONDS);
+        String retryAttempts = context.getConfiguration().get(RETRY_ATTEMPTS);
 
         int batchSize = Integer.parseInt(batchSizeString);
         URL jar = null;
@@ -105,6 +111,11 @@ public class MigrationMapper
             logger.info("zkQuorum={}", zkQuorum);
             logger.info("zNodeParent={}", zNodeParent);
             logger.info("fsDefaultName={}", fsDefaultName);
+            logger.info("retrySleep={}", retrySleep);
+            logger.info("retryAttempts={}", retryAttempts);
+            
+    	    System.setProperty(RETRY_SLEEP_MILLISECONDS, retrySleep);
+    	    System.setProperty(RETRY_ATTEMPTS, retryAttempts);
 
             Path[] localFiles = DistributedCache.getLocalCacheFiles(configuration);
             for (Path path : localFiles) {
