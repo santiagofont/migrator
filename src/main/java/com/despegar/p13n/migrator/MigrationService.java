@@ -65,6 +65,8 @@ public class MigrationService {
     
     private String retryAttempts;
     
+    private String monitorProgress;
+    
     private Properties environmentProperties;
     private Properties tablesProperties;
     
@@ -134,6 +136,7 @@ public class MigrationService {
 	    // hbase.client.pause  default to 1000 (1 second)
 	    this.retrySleep = this.loadProperty(MigrationMapper.RETRY_SLEEP_MILLISECONDS);
 	    this.retryAttempts = this.loadProperty(MigrationMapper.RETRY_ATTEMPTS);
+	    this.monitorProgress = this.loadProperty(MigrationMapper.MONITOR_PROGRESS);
 	    
 		FileInputStream tablesInputStream = new FileInputStream( new File(tablesPath));
 		tablesProperties = new Properties();
@@ -187,6 +190,8 @@ public class MigrationService {
    
     private void initializeHbase() throws URISyntaxException {
         conf = new Configuration();
+        conf.set(MigrationMapper.MONITOR_PROGRESS, this.monitorProgress);
+
         // source H1
         conf.set(MigrationService.MAPRED_JOB_TRACKER, this.jobTracker);
         conf.set(MigrationService.HBASE_ZOOKEEPER_QUORUM, this.sourceZookeeperQuorum);
@@ -204,13 +209,14 @@ public class MigrationService {
         
         conf.set(MigrationMapper.RETRY_SLEEP_MILLISECONDS, this.retrySleep);
         conf.set(MigrationMapper.RETRY_ATTEMPTS, this.retryAttempts);
+        
 
         DistributedCache.addCacheFile(new URI(this.jar), conf);
 
     }
     
 	private String loadProperty(String propertyName) {
-		String value = this.environmentProperties.getProperty(propertyName);
+		String value = this.environmentProperties.getProperty(propertyName).trim();
 		LOG.info(propertyName+"="+value);
 		return value;
 	}

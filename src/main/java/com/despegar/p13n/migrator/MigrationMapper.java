@@ -36,6 +36,7 @@ public class MigrationMapper
     
 	protected final static String RETRY_SLEEP_MILLISECONDS = "migrator.retry.sleep";
 	protected final static String RETRY_ATTEMPTS = "migrator.retry.attempts";
+	protected final static String MONITOR_PROGRESS = "migrator.progress";
 
     public final static String JAR = "h2_server_jar";
 
@@ -46,6 +47,8 @@ public class MigrationMapper
     private MyClassLoader serverLoader;
 
     private long counter = 0;
+    
+    private boolean monitorProgress = false;
 
     @Override
     public void map(ImmutableBytesWritable key, Result value, Context context) throws IOException, InterruptedException {
@@ -68,6 +71,9 @@ public class MigrationMapper
             this.consumer.consume(values);
         } catch (Exception e) {
             logger.info("write failed with error " + e.getMessage(), e);
+        }
+        if (this.monitorProgress) {
+        	context.progress();
         }
 
         // NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> map = value.getMap();
@@ -101,6 +107,9 @@ public class MigrationMapper
         
         String retrySleep = context.getConfiguration().get(RETRY_SLEEP_MILLISECONDS);
         String retryAttempts = context.getConfiguration().get(RETRY_ATTEMPTS);
+        
+        String progress = context.getConfiguration().get(MONITOR_PROGRESS);
+        this.monitorProgress = Boolean.parseBoolean(progress);
 
         int batchSize = Integer.parseInt(batchSizeString);
         URL jar = null;
@@ -113,6 +122,7 @@ public class MigrationMapper
             logger.info("fsDefaultName={}", fsDefaultName);
             logger.info("retrySleep={}", retrySleep);
             logger.info("retryAttempts={}", retryAttempts);
+            logger.info("monitorProgress={}", this.monitorProgress);
             
     	    System.setProperty(RETRY_SLEEP_MILLISECONDS, retrySleep);
     	    System.setProperty(RETRY_ATTEMPTS, retryAttempts);

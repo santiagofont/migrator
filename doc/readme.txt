@@ -6,26 +6,26 @@ This tool launches a map reduce that requires a tablewriter.jar file installed o
 
 1.1) The following steps describe how to copy that jar from a local FS to the source HDFS.
 
-scp ~/workspace/tablewriter/target/tablewriter-1.2.4.jar despegar@hb-master-beta-00:/home/despegar
+scp ~/workspace/tablewriter/target/tablewriter-1.2.5.jar despegar@hb-master-beta-00:/home/despegar
 ssh("hb-master-beta",0)
 cd /opt/hadoop/hadoop-1.0.4/
-bin/hadoop fs -copyFromLocal ~/tablewriter-1.2.4.jar /tmp/tablewriter-1.2.4.jar
+bin/hadoop fs -copyFromLocal ~/workspace/tablewriter/target/tablewriter-1.2.5.jar /tmp/tablewriter-1.2.5.jar
 
 1.2) Install the migrator tool into the source Hbase.
 
-scp ~/workspace/migrator/target/migrator-0.0.1.tar.gz despegar@vmAustria.servers.despegar.it:/opt
+scp ~/workspace/migrator/target/migrator-0.0.2.tar.gz despegar@vmAustria.servers.despegar.it:/opt
 ssh vmAustria.servers.despegar.it
 cd /opt
-tar -zxvf migrator-0.0.1.tar.gz
+tar -zxvf migrator-0.0.2.tar.gz
 
 
 Usage:
 
-java -jar migrator-0.0.1.jar <environment.properties file path> <tables.properties file path> [run|test]
+java -jar migrator-0.0.2.jar <environment.properties file path> <tables.properties file path> [run|test]
 
 Example:
 
-java -jar migrator-0.0.1.jar environment.properties tables.properties test
+java -jar migrator-0.0.2.jar environment.properties tables.properties test
 
 Where
 
@@ -42,7 +42,7 @@ profiling=eu:profiling
 
 environment.properties contains several configuration settings, for example we used the following for IC :
 
-jar=/tmp/tablewriter-1.2.4.jar
+jar=/tmp/tablewriter-1.2.5.jar
 hbase.client.retries.number=2
 batch.size=1000					# number of rows to be inserted at once, using batch mode.
 synchronic=true					# true migrate one table after other, sequentially. false submits one map reduce per table.
