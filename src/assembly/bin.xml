@@ -28,6 +28,13 @@ xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assemb
 				<include>*</include>
 			</includes>
 		</fileSet>
+		<fileSet>
+			<directory>doc/beta</directory>
+			<outputDirectory>/beta</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+		</fileSet>
 	</fileSets>
 
 </assembly>

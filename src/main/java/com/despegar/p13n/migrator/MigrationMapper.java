@@ -37,6 +37,7 @@ public class MigrationMapper
 	protected final static String RETRY_SLEEP_MILLISECONDS = "migrator.retry.sleep";
 	protected final static String RETRY_ATTEMPTS = "migrator.retry.attempts";
 	protected final static String MONITOR_PROGRESS = "migrator.progress";
+	protected final static String DISABLE_WAL = "migrator.wal.disable";
 
     public final static String JAR = "h2_server_jar";
 
@@ -110,6 +111,8 @@ public class MigrationMapper
         
         String progress = context.getConfiguration().get(MONITOR_PROGRESS);
         this.monitorProgress = Boolean.parseBoolean(progress);
+        
+        String disableWAL = context.getConfiguration().get(DISABLE_WAL);
 
         int batchSize = Integer.parseInt(batchSizeString);
         URL jar = null;
@@ -123,9 +126,11 @@ public class MigrationMapper
             logger.info("retrySleep={}", retrySleep);
             logger.info("retryAttempts={}", retryAttempts);
             logger.info("monitorProgress={}", this.monitorProgress);
+            logger.info("disableWAL={}", disableWAL);
             
     	    System.setProperty(RETRY_SLEEP_MILLISECONDS, retrySleep);
     	    System.setProperty(RETRY_ATTEMPTS, retryAttempts);
+    	    System.setProperty(DISABLE_WAL, disableWAL);
 
             Path[] localFiles = DistributedCache.getLocalCacheFiles(configuration);
             for (Path path : localFiles) {

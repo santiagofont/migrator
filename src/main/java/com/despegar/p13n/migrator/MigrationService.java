@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -66,6 +65,8 @@ public class MigrationService {
     private String retryAttempts;
     
     private String monitorProgress;
+    
+    private String disableWAL;
     
     private Properties environmentProperties;
     private Properties tablesProperties;
@@ -137,6 +138,7 @@ public class MigrationService {
 	    this.retrySleep = this.loadProperty(MigrationMapper.RETRY_SLEEP_MILLISECONDS);
 	    this.retryAttempts = this.loadProperty(MigrationMapper.RETRY_ATTEMPTS);
 	    this.monitorProgress = this.loadProperty(MigrationMapper.MONITOR_PROGRESS);
+	    this.disableWAL = this.loadProperty(MigrationMapper.DISABLE_WAL);
 	    
 		FileInputStream tablesInputStream = new FileInputStream( new File(tablesPath));
 		tablesProperties = new Properties();
@@ -209,6 +211,7 @@ public class MigrationService {
         
         conf.set(MigrationMapper.RETRY_SLEEP_MILLISECONDS, this.retrySleep);
         conf.set(MigrationMapper.RETRY_ATTEMPTS, this.retryAttempts);
+        conf.set(MigrationMapper.DISABLE_WAL, this.disableWAL);
         
 
         DistributedCache.addCacheFile(new URI(this.jar), conf);
