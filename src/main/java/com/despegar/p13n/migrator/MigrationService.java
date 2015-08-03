@@ -35,9 +35,6 @@ public class MigrationService {
     private static final String RUN_MODE = "run";
     private static final String TEST_MODE = "test";
     
-
-    
-    
     private String hbaseZkQuorum;
 
     private String hbaseZNodeParent;
@@ -67,6 +64,8 @@ public class MigrationService {
     private String monitorProgress;
     
     private String disableWAL;
+    
+    private int maxVersions;
     
     private Properties environmentProperties;
     private Properties tablesProperties;
@@ -134,6 +133,8 @@ public class MigrationService {
 	    this.batchSize = this.loadProperty("batch.size");
 	    this.synchronic = Boolean.parseBoolean(this.loadProperty("synchronic"));
 	    this.sourceRetries = Integer.parseInt(this.loadProperty("hbase.client.retries.number"));
+	    this.maxVersions = Integer.parseInt(this.loadProperty("migrator.max.versions"));
+
 	    // hbase.client.pause  default to 1000 (1 second)
 	    this.retrySleep = this.loadProperty(MigrationMapper.RETRY_SLEEP_MILLISECONDS);
 	    this.retryAttempts = this.loadProperty(MigrationMapper.RETRY_ATTEMPTS);
@@ -173,7 +174,8 @@ public class MigrationService {
 
 		Scan scan = new Scan();
 		scan.setAttribute("scan.attributes.table.name", Bytes.toBytes(source));
-
+		scan.setMaxVersions(this.maxVersions);
+	
 		TableMapReduceUtil
 		    .initTableMapperJob(source, scan, MigrationMapper.class, NullWritable.class, NullWritable.class, job);
 

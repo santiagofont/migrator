@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.despegar.p13n.hbase-tool</groupId>
   <artifactId>migrator</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4</version>
   <name>migrator</name>
   <description>migrates data from hbase-hadoop 1 version to hbase 1.1.1-hadoop 2 version</description>
   
