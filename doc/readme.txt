@@ -13,19 +13,19 @@ bin/hadoop fs -copyFromLocal ~/workspace/tablewriter/target/tablewriter-1.2.6.ja
 
 1.2) Install the migrator tool into the source Hbase.
 
-scp ~/workspace/migrator/target/migrator-0.0.3.tar.gz despegar@vmAustria.servers.despegar.it:/opt
+scp ~/workspace/migrator/target/migrator-0.0.6.tar.gz despegar@vmAustria.servers.despegar.it:/opt
 ssh vmAustria.servers.despegar.it
 cd /opt
-tar -zxvf migrator-0.0.3.tar.gz
+tar -zxvf migrator-0.0.6.tar.gz
 
 
 Usage:
 
-java -jar migrator-0.0.3.jar <environment.properties file path> <tables.properties file path> [run|test]
+java -jar migrator-0.0.6.jar <environment.properties file path> <tables.properties file path> [run|test]
 
 Example:
 
-java -jar migrator-0.0.3.jar environment.properties tables.properties test
+java -jar migrator-0.0.6.jar environment.properties tables.properties test
 
 Where
 
@@ -42,13 +42,15 @@ profiling=eu:profiling
 
 environment.properties contains several configuration settings, for example we used the following for IC :
 
-jar=/tmp/tablewriter-1.2.5.jar
+jar=/tmp/tablewriter-1.2.6.jar
 hbase.client.retries.number=2
 batch.size=1000					# number of rows to be inserted at once, using batch mode.
 synchronic=true					# true migrate one table after other, sequentially. false submits one map reduce per table.
 migrator.retry.attempts=50		# max retry attempts, useful to avoid split regions while migrating big tables.
 migrator.retry.sleep=5000		# time to sleep in milliseconds between each retry.
-
+migrator.wal.disable=true		# disables WAL, it runs faster.
+migrator.progress=false			# true runs slower and does not update progress better anyway.
+migrator.max.versions=2147483647 # number of versions to copy
 
 # Source is IC H1
 hbase.zookeeper.quorum=vmaustria.servers.despegar.it:2181

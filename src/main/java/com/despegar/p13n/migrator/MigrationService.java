@@ -179,6 +179,7 @@ public class MigrationService {
 		TableMapReduceUtil
 		    .initTableMapperJob(source, scan, MigrationMapper.class, NullWritable.class, NullWritable.class, job);
 
+		job.setNumReduceTasks(0);
 		job.setOutputFormatClass(NullOutputFormat.class);
 		
 		if (this.synchronic) {
