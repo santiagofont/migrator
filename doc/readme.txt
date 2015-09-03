@@ -9,14 +9,14 @@ This tool launches a map reduce that requires a tablewriter.jar file installed o
 scp ~/workspace/tablewriter/target/tablewriter-1.2.6.jar despegar@hb-master-beta-00:/home/despegar
 ssh("hb-master-beta",0)
 cd /opt/hadoop/hadoop-1.0.4/
-bin/hadoop fs -copyFromLocal ~/workspace/tablewriter/target/tablewriter-1.2.6.jar /tmp/tablewriter-1.2.6.jar
+bin/hadoop fs -copyFromLocal ~/workspace/tablewriter/target/tablewriter-1.2.8.jar /tmp/tablewriter-1.2.8.jar
 
 1.2) Install the migrator tool into the source Hbase.
 
 scp ~/workspace/migrator/target/migrator-0.0.6.tar.gz despegar@vmAustria.servers.despegar.it:/opt
 ssh vmAustria.servers.despegar.it
 cd /opt
-tar -zxvf migrator-0.0.6.tar.gz
+tar -zxvf migrator-0.0.8.tar.gz
 
 
 Usage:

@@ -65,13 +65,21 @@ public class MigrationService {
     
     private String disableWAL;
     
+    private String force;
+    
     private int maxVersions;
+    
+    private Long starttime = null;
+    private Long endtime = null;
+    
+    private boolean speculative = false;
     
     private Properties environmentProperties;
     private Properties tablesProperties;
     
     private Configuration conf;
-
+    
+    
 	public static void main(String[] args) {
 		
 		if(args.length != 3) {
@@ -140,7 +148,16 @@ public class MigrationService {
 	    this.retryAttempts = this.loadProperty(MigrationMapper.RETRY_ATTEMPTS);
 	    this.monitorProgress = this.loadProperty(MigrationMapper.MONITOR_PROGRESS);
 	    this.disableWAL = this.loadProperty(MigrationMapper.DISABLE_WAL);
-	    
+	    this.force = this.loadProperty(MigrationMapper.FORCE);
+	    this.speculative = Boolean.parseBoolean(this.loadProperty("speculative"));
+	    String startTime = this.loadProperty("source.scan.start.time");
+	    if (startTime != null && !startTime.isEmpty()) {
+	    	this.starttime = Long.parseLong(startTime);
+	    }
+    	String endTime = this.loadProperty("source.scan.end.time");
+	    if (endTime != null && !endTime.isEmpty()) {
+		    this.endtime = Long.parseLong(endTime);
+	    }
 		FileInputStream tablesInputStream = new FileInputStream( new File(tablesPath));
 		tablesProperties = new Properties();
 		tablesProperties.load(tablesInputStream);
@@ -175,13 +192,16 @@ public class MigrationService {
 		Scan scan = new Scan();
 		scan.setAttribute("scan.attributes.table.name", Bytes.toBytes(source));
 		scan.setMaxVersions(this.maxVersions);
+		if (this.starttime != null && this.endtime != null) {
+			scan.setTimeRange(starttime, endtime);
+		}
 	
 		TableMapReduceUtil
 		    .initTableMapperJob(source, scan, MigrationMapper.class, NullWritable.class, NullWritable.class, job);
 
 		job.setNumReduceTasks(0);
 		job.setOutputFormatClass(NullOutputFormat.class);
-		
+		job.setSpeculativeExecution(this.speculative);
 		if (this.synchronic) {
 		    job.waitForCompletion(true);
 		    LOG.info("table completed");
@@ -215,6 +235,7 @@ public class MigrationService {
         conf.set(MigrationMapper.RETRY_SLEEP_MILLISECONDS, this.retrySleep);
         conf.set(MigrationMapper.RETRY_ATTEMPTS, this.retryAttempts);
         conf.set(MigrationMapper.DISABLE_WAL, this.disableWAL);
+        conf.set(MigrationMapper.FORCE, this.force);
         
 
         DistributedCache.addCacheFile(new URI(this.jar), conf);
